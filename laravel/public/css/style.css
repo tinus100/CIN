@@ -1,0 +1,173 @@
+@import url('https://fonts.googleapis.com/css2?family=Dosis&display=swap');
+
+html {
+    height: 100%;
+    width: 100%;
+    background-size: cover;
+    background-color: #dddddd;
+    font-family: 'Dosis', monospace;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+.topnav {
+    overflow: hidden;
+    background: linear-gradient(0deg, rgba(198,198,198,0.5522409647452731) 0%, rgba(183,193,209,1) 50%);
+    border-radius: 5px;
+}
+.topnav a {
+    text-decoration: none;
+    float: left;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    transition: 0.7s;
+}
+.topnav a:hover {
+    background-color: whitesmoke;
+    color: black;
+}
+.active-nav {
+    background-color: whitesmoke;
+    color: black !important;
+}
+.welcome {
+    text-align: center;
+    background: linear-gradient(0deg, rgba(198,198,198,0.5522409647452731) 0%, rgba(183,193,209,1) 50%);
+    color: rgb(255, 255, 255);
+    padding-top: 20px;
+    padding-bottom: 20px;
+    margin-top: 20px;
+    margin-left: 400px;
+    margin-right: 400px;
+    border-radius: 5px;
+}
+.top-list {
+    background: linear-gradient(0deg, rgba(198,198,198,1) 0%, rgba(183,193,209,1) 50%);
+    color: whitesmoke;
+    padding: 20px;
+    width: 80%;
+    text-align: left;
+    font-size: 20px;
+    margin: auto;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+}
+.bottom-list {
+    background-color: rgb(245, 245, 245, 0.7);
+    margin: auto;
+    text-align: left;
+    color: black;
+    width: 80%;
+    padding: 18px;
+    overflow: hidden;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    transition: 0.7s;
+    margin-bottom: 50px;
+}
+.bottom-list:hover {
+    background-color: rgb(245, 245, 245);
+}
+li {
+    padding-left: 20px;
+    list-style-type: none;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: 100%;
+    border: 1px solid #ddd;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 16px;
+  }
+  .top-list-small {
+    background: linear-gradient(0deg, rgba(198,198,198,1) 0%, rgba(183,193,209,1) 50%);
+    color: whitesmoke;
+    padding: 20px;
+    width: 80%;
+    text-align: center;
+    font-size: 20px;
+    margin: auto;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+}
+
+.bottom-list-small {
+    background-color: rgb(245, 245, 245, 0.7);
+    margin: auto;
+    text-align: left;
+    color: black;
+    width: 80%;
+    padding: 18px;
+    overflow: hidden;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    transition: 0.7s;
+    margin-bottom: 18px;
+}
+
+.bottom-list-small:hover {
+    background-color: rgb(245, 245, 245);
+}
+.correction-small-list {
+    float: left;
+    margin: auto;
+    width: 35%;
+    height:100%;
+    margin-left: 10%;
+}
+
+.meter {
+    height: 20px;
+	background: rgb(139, 139, 139);
+	border-radius: 5px;
+	padding: 15px;
+    width: 80%;
+    margin: auto;
+    margin-top: 50px;
+}
+
+.meter > span {
+    display: block;
+    height: 100%;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    background-color: rgb(43,194,83);
+    text-align: center;
+    color: whitesmoke;
+    overflow: hidden;
+  }
+  a {
+      text-decoration-color: rgba(0, 0, 0, 0.349);
+      color: black;
+  }
+
+button{
+    display:inline-block;
+    padding:0.35em 1.2em;
+    border:0.1em solid #FFFFFF;
+    margin:0 0.3em 0.3em 0;
+    border-radius:0.12em;
+    box-sizing: border-box;
+    text-decoration:none;
+    font-family:'Roboto',sans-serif;
+    font-weight:300;
+    color:#FFFFFF;
+    text-align:center;
+    transition: all 0.2s;
+    }
+button:hover{
+    color:#000000;
+    background-color:#FFFFFF;
+    }
+    @media all and (max-width:30em){
+button{
+        display:block;
+        margin:0.4em auto
+         }
+        }
