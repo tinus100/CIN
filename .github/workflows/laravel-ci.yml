@@ -16,18 +16,23 @@ jobs:
 
       - name: Copy .env
         run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+        working-directory: laravel
 
       - name: Install Dependencies
         run: composer install --prefer-dist --no-progress --no-suggest
+        working-directory: laravel
 
       - name: Generate Key
         run: php artisan key:generate
+        working-directory: laravel
 
       - name: Directory Permissions
         run: chmod -R 777 storage bootstrap/cache
+        working-directory: laravel
 
       - name: Run Migrations
         run: php artisan migrate --no-interaction --force
+        working-directory: laravel
 
       - name: Execute Tests
         run: vendor/bin/phpunit
