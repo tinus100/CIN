@@ -14,12 +14,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up PHP 7.0
+      - name: Set up PHP 8.2
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '7.0'
-        working-directory: laravel
-
+          php-version: '8.2'
+        
       - name: Copy .env
         run: php -r "file_exists('.env') || copy('.env.example', '.env');"
         working-directory: laravel
@@ -42,16 +41,4 @@ jobs:
 
       - name: Execute Tests
         run: vendor/bin/phpunit
-        working-directory: laravel
-
-      - name: Setup Node (optional, if you have JavaScript tests or build steps)
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-        working-directory: laravel
-
-      - name: NPM Install and Build (optional)
-        run: |
-          npm install
-          npm run production
         working-directory: laravel
