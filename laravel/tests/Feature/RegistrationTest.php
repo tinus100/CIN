@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase; // Gebruikt om de database te vernieuwen voor elke test
 use Tests\TestCase;
+use App\Models\User; // Importeer het User model
 
 class RegistrationTest extends TestCase
 {
@@ -32,9 +33,20 @@ class RegistrationTest extends TestCase
             'password_confirmation' => 'password',
         ]);
 
-        $this->assertAuthenticated(); // Controleert of de gebruiker is geauthenticeerd na registratie
-        $response->assertRedirect(RouteServiceProvider::HOME); // Controleert of de respons een omleiding is naar de homepagina
+        // Ophalen van de nieuw geregistreerde gebruiker
+        $user = User::latest('id')->first();
+
+        // Simuleren dat de gebruiker zijn e-mail heeft geverifieerd
+        $user->markEmailAsVerified();
+
+        // Controleert of de gebruiker is geauthenticeerd na registratie
+        $this->assertAuthenticated();
+
+        // Controleert of de respons een omleiding is naar de homepagina
+        $response->assertRedirect(RouteServiceProvider::HOME);
     }
 }
+
+
 
 
