@@ -37,7 +37,7 @@ class RegistrationTest extends TestCase
         $user = User::latest('id')->first();
 
         // Simuleren dat de gebruiker zijn e-mail heeft geverifieerd
-        $user->markEmailAsVerified();
+        #$user->markEmailAsVerified();
 
         // Controleert of de gebruiker is geauthenticeerd na registratie
         $this->assertAuthenticated();
