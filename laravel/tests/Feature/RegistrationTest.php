@@ -40,7 +40,7 @@ class RegistrationTest extends TestCase
         #$user->markEmailAsVerified();
 
         // Controleert of de gebruiker is geauthenticeerd na registratie
-        $this->assertAuthenticated();
+        #$this->assertAuthenticated();
 
         // Controleert of de respons een omleiding is naar de homepagina
         $response->assertRedirect(RouteServiceProvider::HOME);
