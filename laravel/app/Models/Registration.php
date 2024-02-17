@@ -10,11 +10,22 @@ class Registration extends Model
     use HasFactory;
 
     protected $fillable = [
-        'voornaam', 'achternaam', 'geslacht', 'postcode', 'adres', 'stad', 'verwijzer', 'email'
+        'voornaam',
+        'achternaam',
+        'geslacht',
+        'postcode',
+        'adres',
+        'stad',
+        'verwijzer',
+        'email',
     ];
+
 
     public function path()
     {
         return route('registration.show', $this);
-    }
-}
+
+    }//end path()
+
+
+}//end class

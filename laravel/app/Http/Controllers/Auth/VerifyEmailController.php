@@ -9,10 +9,12 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 class VerifyEmailController extends Controller
 {
+
+
     /**
      * Mark the authenticated user's email address as verified.
      *
-     * @param  \Illuminate\Foundation\Auth\EmailVerificationRequest  $request
+     * @param  \Illuminate\Foundation\Auth\EmailVerificationRequest $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(EmailVerificationRequest $request)
@@ -26,5 +28,8 @@ class VerifyEmailController extends Controller
         }
 
         return redirect()->intended(RouteServiceProvider::HOME.'?verified=1');
-    }
-}
+
+    }//end __invoke()
+
+
+}//end class

@@ -6,6 +6,8 @@ use Illuminate\View\Component;
 
 class GuestLayout extends Component
 {
+
+
     /**
      * Get the view / contents that represents the component.
      *
@@ -14,5 +16,8 @@ class GuestLayout extends Component
     public function render()
     {
         return view('layouts.guest');
-    }
-}
+
+    }//end render()
+
+
+}//end class

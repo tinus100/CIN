@@ -9,13 +9,15 @@ use Illuminate\Support\Facades\DB;
 
 class EmailMessageController extends Controller
 {
+
+
     public function store(Registration $registration)
     {
-
-
-        Mail::to($registration->email)
-            ->send(new AgendaUitnodiging());
+        Mail::to($registration->email)->send(new AgendaUitnodiging());
 
         return redirect('/registration');
-    }
-}
+
+    }//end store()
+
+
+}//end class

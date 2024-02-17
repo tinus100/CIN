@@ -11,6 +11,7 @@ class AgendaUitnodiging extends Mailable
 {
     use Queueable, SerializesModels;
 
+
     /**
      * Create a new message instance.
      *
@@ -18,8 +19,9 @@ class AgendaUitnodiging extends Mailable
      */
     public function __construct()
     {
-        //
-    }
+
+    }//end __construct()
+
 
     /**
      * Build the message.
@@ -30,5 +32,7 @@ class AgendaUitnodiging extends Mailable
     {
         return $this->markdown('mails.uitnodiging');
 
-    }
-}
+    }//end build()
+
+
+}//end class

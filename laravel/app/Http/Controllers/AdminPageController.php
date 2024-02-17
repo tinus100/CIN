@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Redirect;
 
 class AdminPageController extends Controller
 {
+
+
     /**
      * Display a listing of the resource.
      *
@@ -20,17 +22,15 @@ class AdminPageController extends Controller
      */
     public function index()
     {
-        $users = DB::table('users')
-        ->where('function', '=', 'admin')
-        ->orWhere('function', '=', 'werknemer')
-        ->get();
+        $users = DB::table('users')->where('function', '=', 'admin')->orWhere('function', '=', 'werknemer')->get();
 
         if ($this->validateFunction()) {
             return view('functions.admin.admin-page.index', ['users' => $users]);
-        } else{
+        } else {
             return redirect('/');
         }
-    }
+
+    }//end index()
 
 
     /**
@@ -41,78 +41,92 @@ class AdminPageController extends Controller
     public function create()
     {
         return view('auth.register');
-    }
+
+    }//end create()
+
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'function' => 'required|string',
-            'voornaam' => 'required|string|max:20',
-            'achternaam' => 'required|string|max:20',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|confirmed|min:8',
-        ]);
+        $request->validate(
+            [
+                'function'   => 'required|string',
+                'voornaam'   => 'required|string|max:20',
+                'achternaam' => 'required|string|max:20',
+                'email'      => 'required|string|email|max:255|unique:users',
+                'password'   => 'required|string|confirmed|min:8',
+            ]
+        );
 
-        $user = User::create([
-            'function' => $request->function,
-            'voornaam' => $request->voornaam,
-            'achternaam' => $request->achternaam,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        $user = User::create(
+            [
+                'function'   => $request->function,
+                'voornaam'   => $request->voornaam,
+                'achternaam' => $request->achternaam,
+                'email'      => $request->email,
+                'password'   => Hash::make($request->password),
+            ]
+        );
 
         event(new Registered($user));
 
-//        Auth::login($user);
-
+// Auth::login($user);
         return redirect('/admin');
-    }
+
+    }//end store()
+
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Registration  $registration
+     * @param  \App\Models\Registration $registration
      * @return \Illuminate\Http\Response
      */
     public function edit(User $user)
     {
         return view('functions.admin.admin-page.edit', compact('user'));
-    }
+
+    }//end edit()
+
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Registration  $registration
+     * @param  \App\Models\Registration $registration
      * @return \Illuminate\Http\Response
      */
     public function destroy(User $user)
     {
         $user->delete();
         return redirect('/admin');
-    }
+
+    }//end destroy()
+
 
     public function validateFunction()
     {
         // if (Auth::user()->function = 'admin') {
-        //     return true;
+        // return true;
         // } else {
-        //     return false;
+        // return false;
         // }
-
         switch (Auth::user()->function) {
             case 'admin':
-                return true;
+            return true;
+
                 break;
 
             default:
-                return false;
+            return false;
                 break;
         }
-    }
-}
+
+    }//end validateFunction()
+
+
+}//end class
