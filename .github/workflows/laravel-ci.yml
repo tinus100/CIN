@@ -64,11 +64,6 @@ jobs:
         run: vendor/bin/phpcs app
         working-directory: laravel
 
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4.0.1
-        env:
-          token: ${{ 856b7ff5-20d4-4adf-b149-c43490fe34b3 }}
-          slug: rvansikkelerus/project-cin-tijn-ronald
 
 
 
