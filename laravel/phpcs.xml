@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <ruleset name="Selective Standard">
 
-    <!-- Uitsluiten van bestanden om te corrigeren -->
+     Uitsluiten van bestanden om te corrigeren
     <exclude-pattern>Calender2Controller.php</exclude-pattern>
     <exclude-pattern>EmailMessageController.php</exclude-pattern>
     <exclude-pattern>IndexController.php</exclude-pattern>
@@ -40,7 +40,7 @@
     <exclude-pattern>View/Components/AppLayout.php</exclude-pattern>
     <exclude-pattern>View/Components/GuestLayout.php</exclude-pattern>
 
-    <!-- Problemen om over te slaan -->
+     Problemen om over te slaan
     <rule ref="Generic.Files.LineLength">
         <properties>
             <property name="lineLimit" value="120"/>
