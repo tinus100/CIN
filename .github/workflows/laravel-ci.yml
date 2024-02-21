@@ -81,7 +81,7 @@ jobs:
       #   timeout-minutes: 5
       #   env:
       #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #testen sonar code met nieuwe IP route
+      #met port in firewall
 
 
 
