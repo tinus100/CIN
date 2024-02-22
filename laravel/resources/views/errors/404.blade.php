@@ -13,7 +13,11 @@
 <img style="width: 150px; height: 60px;" src="/img/logo.png">
 </a>
 <h1 style="text-align: center; font-weight: bold; font-size: 100px; color: red;">404</h1>
-<h2 style="text-align: center; font-size: 30px;">Sorry, het ligt niet aan jou, maar aan ons.hotfix test<br></h2>
+<<<<<<< HEAD
+<h2 style="text-align: center; font-size: 30px;">Sorry, het ligt niet aan jou, maar aan ons.<br></h2>
+=======
+<h2 style="text-align: center; font-size: 30px;">Sorry, het ligt niet aan jou, maar aan ons.!!<br></h2>
+>>>>>>> 174dfaffa70878e275b8a8d455596b3999e3cca0
 <a href="/">
     <h1 style="text-align: center; font-weight: bold; font-size: 60px; color: greenyellow;">>Snel, terug naar de bewoonde wereld!<</h1>
 </a>
