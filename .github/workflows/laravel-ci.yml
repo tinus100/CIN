@@ -22,21 +22,23 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.0'
+          extensions: xdebug
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-suggest
 
-      - name: Verify PHPUnit Exists
-        run: ls -la ./vendor/bin/
-
       - name: Run Unit Tests and Generate Coverage Report
         run: ./vendor/bin/phpunit --coverage-clover=coverage.xml
+
+      - name: Verify Coverage Report Exists
+        run: ls -la
 
       - name: Upload Coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
           files: coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
 
       - name: Run SonarQube Analysis
         env:
@@ -46,4 +48,3 @@ jobs:
                         -Dsonar.sources=. \
                         -Dsonar.host.url=http://localhost:9000 \
                         -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-
