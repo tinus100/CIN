@@ -24,23 +24,26 @@ jobs:
           php-version: '8.0'
 
       - name: Install dependencies
-        run: composer install
+        run: composer install --prefer-dist --no-progress --no-suggest
 
-      - name: Run Unit Tests
-        run: ./vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml
+      - name: Verify PHPUnit Exists
+        run: ls -la ./vendor/bin/
+
+      - name: Run Unit Tests and Generate Coverage Report
+        run: ./vendor/bin/phpunit --coverage-clover=coverage.xml
 
       - name: Upload Coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
-          token: 7483b441-cb77-4d84-b3e4-af5a2cd998ba
           files: coverage.xml
-      
+          token: 7483b441-cb77-4d84-b3e4-af5a2cd998ba
 
       - name: Run SonarQube Analysis
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: sqa_b94639c34d99b03dc2d039294ae08d103f657679
         run: |
           sonar-scanner -Dsonar.projectKey=project-cin \
                         -Dsonar.sources=. \
                         -Dsonar.host.url=http://localhost:9000 \
                         -Dsonar.login=sqa_b94639c34d99b03dc2d039294ae08d103f657679
+
