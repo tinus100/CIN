@@ -36,14 +36,14 @@ jobs:
         uses: codecov/codecov-action@v2
         with:
           files: coverage.xml
-          token: 7483b441-cb77-4d84-b3e4-af5a2cd998ba
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Run SonarQube Analysis
         env:
-          SONAR_TOKEN: sqa_b94639c34d99b03dc2d039294ae08d103f657679
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           sonar-scanner -Dsonar.projectKey=project-cin \
                         -Dsonar.sources=. \
                         -Dsonar.host.url=http://localhost:9000 \
-                        -Dsonar.login=sqa_b94639c34d99b03dc2d039294ae08d103f657679
+                        -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
