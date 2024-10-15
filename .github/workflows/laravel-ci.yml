@@ -30,7 +30,10 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-suggest
 
-      - name: Check PHPUnit Exists
+      - name: Regenerate Composer Autoload
+        run: composer dump-autoload
+
+      - name: List Vendor Bin Directory
         run: ls -la ./vendor/bin/
 
       - name: Run Unit Tests and Generate Coverage Report
