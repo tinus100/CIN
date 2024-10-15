@@ -24,8 +24,14 @@ jobs:
           php-version: '8.0'
           extensions: xdebug
 
+      - name: Check Xdebug Installation
+        run: php -v && php -m | grep xdebug
+
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Check PHPUnit Exists
+        run: ls -la ./vendor/bin/
 
       - name: Run Unit Tests and Generate Coverage Report
         run: ./vendor/bin/phpunit --coverage-clover=coverage.xml
