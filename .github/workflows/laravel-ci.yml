@@ -48,7 +48,6 @@ jobs:
             composer global require phpunit/phpunit:^9.0
             ~/.composer/vendor/bin/phpunit --configuration laravel/phpunit.xml --coverage-clover=coverage.xml
           fi
-      
 
       - name: Verify Coverage Report Exists
         run: ls -la
