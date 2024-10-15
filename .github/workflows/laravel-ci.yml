@@ -36,8 +36,18 @@ jobs:
       - name: List Vendor Bin Directory
         run: ls -la ./vendor/bin/
 
-      - name: Run Unit Tests and Generate Coverage Report
-        run: ./vendor/bin/phpunit --coverage-clover=coverage.xml
+      - name: Check Composer JSON
+        run: cat composer.json
+
+      - name: Run Unit Tests and Generate Coverage Report (from Vendor)
+        run: |
+          if [ -f ./vendor/bin/phpunit ]; then
+            ./vendor/bin/phpunit --coverage-clover=coverage.xml
+          else
+            echo "PHPUnit not found in vendor, installing globally."
+            composer global require phpunit/phpunit:^9.0
+            ~/.composer/vendor/bin/phpunit --coverage-clover=coverage.xml
+          fi
 
       - name: Verify Coverage Report Exists
         run: ls -la
