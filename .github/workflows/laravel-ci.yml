@@ -28,28 +28,22 @@ jobs:
         run: php -v && php -m | grep xdebug
 
       - name: Install dependencies
+        working-directory: laravel
         run: composer install --prefer-dist --no-progress --no-suggest
 
-      - name: Regenerate Composer Autoload
-        run: composer dump-autoload
-
-      - name: List Vendor Bin Directory
-        run: ls -la ./vendor/bin/
-
-      - name: Check Composer JSON
-        run: cat composer.json
-
       - name: Run Unit Tests and Generate Coverage Report (from Vendor)
+        working-directory: laravel
         run: |
           if [ -f ./vendor/bin/phpunit ]; then
-            ./vendor/bin/phpunit --configuration laravel/phpunit.xml --coverage-clover=coverage.xml
+            ./vendor/bin/phpunit --configuration phpunit.xml --coverage-clover=coverage.xml
           else
             echo "PHPUnit not found in vendor, installing globally."
             composer global require phpunit/phpunit:^9.0
-            ~/.composer/vendor/bin/phpunit --configuration laravel/phpunit.xml --coverage-clover=coverage.xml
+            ~/.composer/vendor/bin/phpunit --configuration phpunit.xml --coverage-clover=coverage.xml
           fi
 
       - name: Verify Coverage Report Exists
+        working-directory: laravel
         run: ls -la
 
       - name: Upload Coverage to Codecov
