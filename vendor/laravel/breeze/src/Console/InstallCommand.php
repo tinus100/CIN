@@ -3,19 +3,34 @@
 namespace Laravel\Breeze\Console;
 
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
+use RuntimeException;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 
-class InstallCommand extends Command
+use function Laravel\Prompts\confirm;
+use function Laravel\Prompts\multiselect;
+use function Laravel\Prompts\select;
+
+class InstallCommand extends Command implements PromptsForMissingInput
 {
+    use InstallsApiStack, InstallsBladeStack, InstallsInertiaStacks, InstallsLivewireStack;
+
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'breeze:install
-                            {--inertia : Indicates that the Inertia stack should be installed}
+    protected $signature = 'breeze:install {stack : The development stack that should be installed (blade,livewire,livewire-functional,react,vue,api)}
+                            {--dark : Indicate that dark mode support should be installed}
+                            {--pest : Indicate that Pest should be installed}
+                            {--ssr : Indicates if Inertia SSR support should be installed}
+                            {--typescript : Indicates if TypeScript is preferred for the Inertia stack (Experimental)}
                             {--composer=global : Absolute path to the Composer binary which should be used to install packages}';
 
     /**
@@ -28,145 +43,62 @@ class InstallCommand extends Command
     /**
      * Execute the console command.
      *
-     * @return void
+     * @return int|null
      */
     public function handle()
     {
-        if ($this->option('inertia')) {
-            return $this->installInertiaStack();
+        if ($this->argument('stack') === 'vue') {
+            return $this->installInertiaVueStack();
+        } elseif ($this->argument('stack') === 'react') {
+            return $this->installInertiaReactStack();
+        } elseif ($this->argument('stack') === 'api') {
+            return $this->installApiStack();
+        } elseif ($this->argument('stack') === 'blade') {
+            return $this->installBladeStack();
+        } elseif ($this->argument('stack') === 'livewire') {
+            return $this->installLivewireStack();
+        } elseif ($this->argument('stack') === 'livewire-functional') {
+            return $this->installLivewireStack(true);
         }
 
-        // NPM Packages...
-        $this->updateNodePackages(function ($packages) {
-            return [
-                '@tailwindcss/forms' => '^0.2.1',
-                'alpinejs' => '^2.7.3',
-                'autoprefixer' => '^10.1.0',
-                'postcss' => '^8.2.1',
-                'postcss-import' => '^12.0.1',
-                'tailwindcss' => '^2.0.2',
-            ] + $packages;
-        });
+        $this->components->error('Invalid stack. Supported stacks are [blade], [livewire], [livewire-functional], [react], [vue], and [api].');
 
-        // Controllers...
-        (new Filesystem)->ensureDirectoryExists(app_path('Http/Controllers/Auth'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/default/App/Http/Controllers/Auth', app_path('Http/Controllers/Auth'));
-
-        // Requests...
-        (new Filesystem)->ensureDirectoryExists(app_path('Http/Requests/Auth'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/default/App/Http/Requests/Auth', app_path('Http/Requests/Auth'));
-
-        // Views...
-        (new Filesystem)->ensureDirectoryExists(resource_path('views/auth'));
-        (new Filesystem)->ensureDirectoryExists(resource_path('views/layouts'));
-        (new Filesystem)->ensureDirectoryExists(resource_path('views/components'));
-
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/default/resources/views/auth', resource_path('views/auth'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/default/resources/views/layouts', resource_path('views/layouts'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/default/resources/views/components', resource_path('views/components'));
-
-        copy(__DIR__.'/../../stubs/default/resources/views/dashboard.blade.php', resource_path('views/dashboard.blade.php'));
-
-        // Components...
-        (new Filesystem)->ensureDirectoryExists(app_path('View/Components'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/default/App/View/Components', app_path('View/Components'));
-
-        // Tests...
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/default/tests/Feature', base_path('tests/Feature'));
-
-        // Routes...
-        copy(__DIR__.'/../../stubs/default/routes/web.php', base_path('routes/web.php'));
-        copy(__DIR__.'/../../stubs/default/routes/auth.php', base_path('routes/auth.php'));
-
-        // "Dashboard" Route...
-        $this->replaceInFile('/home', '/dashboard', resource_path('views/welcome.blade.php'));
-        $this->replaceInFile('Home', 'Dashboard', resource_path('views/welcome.blade.php'));
-        $this->replaceInFile('/home', '/dashboard', app_path('Providers/RouteServiceProvider.php'));
-
-        // Tailwind / Webpack...
-        copy(__DIR__.'/../../stubs/default/tailwind.config.js', base_path('tailwind.config.js'));
-        copy(__DIR__.'/../../stubs/default/webpack.mix.js', base_path('webpack.mix.js'));
-        copy(__DIR__.'/../../stubs/default/resources/css/app.css', resource_path('css/app.css'));
-        copy(__DIR__.'/../../stubs/default/resources/js/app.js', resource_path('js/app.js'));
-
-        $this->info('Breeze scaffolding installed successfully.');
-        $this->comment('Please execute the "npm install && npm run dev" command to build your assets.');
+        return 1;
     }
 
     /**
-     * Install the Inertia Breeze stack.
+     * Install Breeze's tests.
      *
-     * @return void
+     * @return bool
      */
-    protected function installInertiaStack()
+    protected function installTests()
     {
-        // Install Inertia...
-        $this->requireComposerPackages('inertiajs/inertia-laravel:^0.3.5', 'laravel/sanctum:^2.6', 'tightenco/ziggy:^1.0');
+        (new Filesystem)->ensureDirectoryExists(base_path('tests/Feature'));
 
-        // NPM Packages...
-        $this->updateNodePackages(function ($packages) {
-            return [
-                '@inertiajs/inertia' => '^0.8.4',
-                '@inertiajs/inertia-vue3' => '^0.3.5',
-                '@inertiajs/progress' => '^0.2.4',
-                '@tailwindcss/forms' => '^0.2.1',
-                '@vue/compiler-sfc' => '^3.0.5',
-                'autoprefixer' => '^10.2.4',
-                'postcss' => '^8.2.1',
-                'postcss-import' => '^12.0.1',
-                'tailwindcss' => '^2.0.3',
-                'vue' => '^3.0.5',
-                'vue-loader' => '^16.1.2',
-            ] + $packages;
-        });
+        $stubStack = match ($this->argument('stack')) {
+            'api' => 'api',
+            'livewire' => 'livewire-common',
+            'livewire-functional' => 'livewire-common',
+            default => 'default',
+        };
 
-        // Controllers...
-        (new Filesystem)->ensureDirectoryExists(app_path('Http/Controllers/Auth'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia/app/Http/Controllers/Auth', app_path('Http/Controllers/Auth'));
+        if ($this->option('pest') || $this->isUsingPest()) {
+            if ($this->hasComposerPackage('phpunit/phpunit')) {
+                $this->removeComposerPackages(['phpunit/phpunit'], true);
+            }
 
-        // Requests...
-        (new Filesystem)->ensureDirectoryExists(app_path('Http/Requests/Auth'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/default/App/Http/Requests/Auth', app_path('Http/Requests/Auth'));
+            if (! $this->requireComposerPackages(['pestphp/pest:^2.0', 'pestphp/pest-plugin-laravel:^2.0'], true)) {
+                return false;
+            }
 
-        // Middleware...
-        $this->installMiddlewareAfter('SubstituteBindings::class', '\App\Http\Middleware\HandleInertiaRequests::class');
+            (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/'.$stubStack.'/pest-tests/Feature', base_path('tests/Feature'));
+            (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/'.$stubStack.'/pest-tests/Unit', base_path('tests/Unit'));
+            (new Filesystem)->copy(__DIR__.'/../../stubs/'.$stubStack.'/pest-tests/Pest.php', base_path('tests/Pest.php'));
+        } else {
+            (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/'.$stubStack.'/tests/Feature', base_path('tests/Feature'));
+        }
 
-        copy(__DIR__.'/../../stubs/inertia/app/Http/Middleware/HandleInertiaRequests.php', app_path('Http/Middleware/HandleInertiaRequests.php'));
-
-        // Views...
-        copy(__DIR__.'/../../stubs/inertia/resources/views/app.blade.php', resource_path('views/app.blade.php'));
-
-        // Components + Pages...
-        (new Filesystem)->ensureDirectoryExists(resource_path('js/Components'));
-        (new Filesystem)->ensureDirectoryExists(resource_path('js/Layouts'));
-        (new Filesystem)->ensureDirectoryExists(resource_path('js/Pages'));
-
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia/resources/js/Components', resource_path('js/Components'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia/resources/js/Layouts', resource_path('js/Layouts'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia/resources/js/Pages', resource_path('js/Pages'));
-
-        // Tests...
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/default/tests/Feature', base_path('tests/Feature'));
-
-        // Routes...
-        copy(__DIR__.'/../../stubs/inertia/routes/web.php', base_path('routes/web.php'));
-        copy(__DIR__.'/../../stubs/inertia/routes/auth.php', base_path('routes/auth.php'));
-
-        // "Dashboard" Route...
-        $this->replaceInFile('/home', '/dashboard', resource_path('js/Pages/Welcome.vue'));
-        $this->replaceInFile('Home', 'Dashboard', resource_path('js/Pages/Welcome.vue'));
-        $this->replaceInFile('/home', '/dashboard', app_path('Providers/RouteServiceProvider.php'));
-
-        // Tailwind / Webpack...
-        copy(__DIR__.'/../../stubs/inertia/tailwind.config.js', base_path('tailwind.config.js'));
-        copy(__DIR__.'/../../stubs/inertia/webpack.mix.js', base_path('webpack.mix.js'));
-        copy(__DIR__.'/../../stubs/inertia/webpack.config.js', base_path('webpack.config.js'));
-        copy(__DIR__.'/../../stubs/inertia/jsconfig.json', base_path('jsconfig.json'));
-        copy(__DIR__.'/../../stubs/inertia/resources/css/app.css', resource_path('css/app.css'));
-        copy(__DIR__.'/../../stubs/inertia/resources/js/app.js', resource_path('js/app.js'));
-
-        $this->info('Breeze scaffolding installed successfully.');
-        $this->comment('Please execute the "npm install && npm run dev" command to build your assets.');
+        return true;
     }
 
     /**
@@ -200,12 +132,27 @@ class InstallCommand extends Command
     }
 
     /**
+     * Determine if the given Composer package is installed.
+     *
+     * @param  string  $package
+     * @return bool
+     */
+    protected function hasComposerPackage($package)
+    {
+        $packages = json_decode(file_get_contents(base_path('composer.json')), true);
+
+        return array_key_exists($package, $packages['require'] ?? [])
+            || array_key_exists($package, $packages['require-dev'] ?? []);
+    }
+
+    /**
      * Installs the given Composer Packages into the application.
      *
-     * @param  mixed  $packages
-     * @return void
+     * @param  array  $packages
+     * @param  bool  $asDev
+     * @return bool
      */
-    protected function requireComposerPackages($packages)
+    protected function requireComposerPackages(array $packages, $asDev = false)
     {
         $composer = $this->option('composer');
 
@@ -215,14 +162,43 @@ class InstallCommand extends Command
 
         $command = array_merge(
             $command ?? ['composer', 'require'],
-            is_array($packages) ? $packages : func_get_args()
+            $packages,
+            $asDev ? ['--dev'] : [],
         );
 
-        (new Process($command, base_path(), ['COMPOSER_MEMORY_LIMIT' => '-1']))
+        return (new Process($command, base_path(), ['COMPOSER_MEMORY_LIMIT' => '-1']))
             ->setTimeout(null)
             ->run(function ($type, $output) {
                 $this->output->write($output);
-            });
+            }) === 0;
+    }
+
+    /**
+     * Removes the given Composer Packages from the application.
+     *
+     * @param  array  $packages
+     * @param  bool  $asDev
+     * @return bool
+     */
+    protected function removeComposerPackages(array $packages, $asDev = false)
+    {
+        $composer = $this->option('composer');
+
+        if ($composer !== 'global') {
+            $command = ['php', $composer, 'remove'];
+        }
+
+        $command = array_merge(
+            $command ?? ['composer', 'remove'],
+            $packages,
+            $asDev ? ['--dev'] : [],
+        );
+
+        return (new Process($command, base_path(), ['COMPOSER_MEMORY_LIMIT' => '-1']))
+            ->setTimeout(null)
+            ->run(function ($type, $output) {
+                $this->output->write($output);
+            }) === 0;
     }
 
     /**
@@ -281,5 +257,118 @@ class InstallCommand extends Command
     protected function replaceInFile($search, $replace, $path)
     {
         file_put_contents($path, str_replace($search, $replace, file_get_contents($path)));
+    }
+
+    /**
+     * Get the path to the appropriate PHP binary.
+     *
+     * @return string
+     */
+    protected function phpBinary()
+    {
+        return (new PhpExecutableFinder())->find(false) ?: 'php';
+    }
+
+    /**
+     * Run the given commands.
+     *
+     * @param  array  $commands
+     * @return void
+     */
+    protected function runCommands($commands)
+    {
+        $process = Process::fromShellCommandline(implode(' && ', $commands), null, null, null, null);
+
+        if ('\\' !== DIRECTORY_SEPARATOR && file_exists('/dev/tty') && is_readable('/dev/tty')) {
+            try {
+                $process->setTty(true);
+            } catch (RuntimeException $e) {
+                $this->output->writeln('  <bg=yellow;fg=black> WARN </> '.$e->getMessage().PHP_EOL);
+            }
+        }
+
+        $process->run(function ($type, $line) {
+            $this->output->write('    '.$line);
+        });
+    }
+
+    /**
+     * Remove Tailwind dark classes from the given files.
+     *
+     * @param  \Symfony\Component\Finder\Finder  $finder
+     * @return void
+     */
+    protected function removeDarkClasses(Finder $finder)
+    {
+        foreach ($finder as $file) {
+            file_put_contents($file->getPathname(), preg_replace('/\sdark:[^\s"\']+/', '', $file->getContents()));
+        }
+    }
+
+    /**
+     * Prompt for missing input arguments using the returned questions.
+     *
+     * @return array
+     */
+    protected function promptForMissingArgumentsUsing()
+    {
+        return [
+            'stack' => fn () => select(
+                label: 'Which Breeze stack would you like to install?',
+                options: [
+                    'blade' => 'Blade with Alpine',
+                    'livewire' => 'Livewire (Volt Class API) with Alpine',
+                    'livewire-functional' => 'Livewire (Volt Functional API) with Alpine',
+                    'react' => 'React with Inertia',
+                    'vue' => 'Vue with Inertia',
+                    'api' => 'API only',
+                ],
+                scroll: 6,
+            ),
+        ];
+    }
+
+    /**
+     * Interact further with the user if they were prompted for missing arguments.
+     *
+     * @param  \Symfony\Component\Console\Input\InputInterface  $input
+     * @param  \Symfony\Component\Console\Output\OutputInterface  $output
+     * @return void
+     */
+    protected function afterPromptingForMissingArguments(InputInterface $input, OutputInterface $output)
+    {
+        $stack = $input->getArgument('stack');
+
+        if (in_array($stack, ['react', 'vue'])) {
+            collect(multiselect(
+                label: 'Would you like any optional features?',
+                options: [
+                    'dark' => 'Dark mode',
+                    'ssr' => 'Inertia SSR',
+                    'typescript' => 'TypeScript (experimental)',
+                ]
+            ))->each(fn ($option) => $input->setOption($option, true));
+        } elseif (in_array($stack, ['blade', 'livewire', 'livewire-functional'])) {
+            $input->setOption('dark', confirm(
+                label: 'Would you like dark mode support?',
+                default: false
+            ));
+        }
+
+        $input->setOption('pest', select(
+            label: 'Which testing framework do you prefer?',
+            options: ['PHPUnit', 'Pest'],
+            default: $this->isUsingPest() ? 'Pest' : 'PHPUnit',
+        ) === 'Pest');
+    }
+
+    /**
+     * Determine whether the project is already using Pest.
+     *
+     * @return bool
+     */
+    protected function isUsingPest()
+    {
+        return class_exists(\Pest\TestSuite::class);
     }
 }
