@@ -6,7 +6,7 @@
 
 <div id='wrapper'>
     <div id='page' class='container'>
-        <h1 class='has-text-weight-bold is-size-8'>Nieuwe Afspraak</h1>
+        <h1 class='has-text-weight-bold is-size-8'>Nieuwe Afspraak!!!</h1>
 
 <form method='POST' action="/events">
     @csrf
