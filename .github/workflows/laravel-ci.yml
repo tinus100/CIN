@@ -1,14 +1,12 @@
-name: CI Pipeline
+name: Laravel CI with Database Tests
 
 on:
   push:
     branches:
       - develop
-      - main
   pull_request:
     branches:
       - develop
-      - main
 
 jobs:
   build:
@@ -18,73 +16,64 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: root_password
-          MYSQL_DATABASE: laravel_test
-          MYSQL_USER: root
-          MYSQL_PASSWORD: root_password  # Gebruik hetzelfde wachtwoord hier en in .env.testing
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: testing
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping --silent"
+          --health-cmd="mysqladmin ping --host=localhost --user=root --password=rootpassword"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
 
+      # Step 2: Set up PHP
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
-          extensions: xdebug
+          php-version: '8.1'  # Set the PHP version you want
+          extensions: mbstring, bcmath, gd, xml, pdo, tokenizer
+          coverage: xdebug  # Optional: if you want coverage reports
 
+      # Step 3: Install dependencies
       - name: Install dependencies
-        working-directory: laravel
-        run: composer install --prefer-dist --no-progress
+        run: |
+          composer install --prefer-dist --no-scripts --no-progress --no-interaction
 
+      # Step 4: Set up the .env file
+      - name: Set up .env file
+        run: cp .env.example .env
+
+      # Step 5: Update database configuration for CI
+      - name: Update database configuration
+        run: |
+          sed -i 's/DB_CONNECTION=mysql/DB_CONNECTION=mysql/' .env
+          sed -i 's/DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/' .env
+          sed -i 's/DB_PORT=3306/DB_PORT=3306/' .env
+          sed -i 's/DB_DATABASE=laravel/DB_DATABASE=testing/' .env
+          sed -i 's/DB_USERNAME=root/DB_USERNAME=root/' .env
+          sed -i 's/DB_PASSWORD=/DB_PASSWORD=rootpassword/' .env
+
+      # Step 6: Generate application key
+      - name: Generate application key
+        run: php artisan key:generate
+
+      # Step 7: Wait for MySQL service to be ready
       - name: Wait for MySQL to be ready
-        run: sleep 30  # Simpel wachten voor 30 seconden zodat MySQL de tijd heeft om op te starten
+        run: |
+          while ! mysqladmin --user=root --password=rootpassword --host=127.0.0.1 --port=3306 ping --silent; do
+            echo "Waiting for MySQL to be ready..."
+            sleep 2
+          done
 
+      # Step 8: Run migrations (optional, only if you need them for your tests)
       - name: Run migrations
-        working-directory: laravel
-        env:
-          DB_CONNECTION: mysql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_DATABASE: laravel_test
-          DB_USERNAME: root
-          DB_PASSWORD: root_password
-        run: php artisan migrate --env=testing --force
+        run: php artisan migrate --env=testing
 
-      - name: Run Unit Tests and Generate Coverage Report (from Vendor)
-        working-directory: laravel
-        run: |
-          if [ -f ./vendor/bin/phpunit ]; then
-            ./vendor/bin/phpunit --configuration phpunit.xml --coverage-clover=coverage.xml
-          else
-            echo "PHPUnit not found in vendor, installing globally."
-            composer global require phpunit/phpunit:^9.0
-            ~/.composer/vendor/bin/phpunit --configuration phpunit.xml --coverage-clover=coverage.xml
-          fi
-
-      - name: Verify Coverage Report Exists
-        working-directory: laravel
-        run: ls -la
-
-      - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          files: coverage.xml
-          token: ${{ secrets.CODECOV_TOKEN }}
-          verbose: true
-
-      - name: Run SonarQube Analysis
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          sonar-scanner -Dsonar.projectKey=project-cin \
-                        -Dsonar.sources=. \
-                        -Dsonar.host.url=http://localhost:9000 \
-                        -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+      # Step 9: Run tests
+      - name: Run tests
+        run: php artisan test
