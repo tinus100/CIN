@@ -29,29 +29,29 @@ jobs:
           --health-retries=3
 
     steps:
-      # Stap 1: Repository uitchecken
+      # Step 1: Checkout the repository
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      # Stap 2: PHP instellen
+      # Step 2: Set up PHP
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
-          extensions: mbstring, bcmath, gd, xml, pdo, tokenizer
-          coverage: xdebug
+          php-version: '8.2'  # Aangepast naar de door jou gewenste PHP versie
+          extensions: mbstring, bcmath, gd, xml, pdo, tokenizer, xdebug
+          coverage: xdebug  # Voor coverage rapporten
 
-      # Stap 3: Dependencies installeren
+      # Step 3: Install dependencies
       - name: Install dependencies
         working-directory: laravel
-        run: composer install --prefer-dist --no-progress
+        run: composer install --prefer-dist --no-scripts --no-progress --no-interaction
 
-      # Stap 4: .env file instellen
+      # Step 4: Set up the .env file
       - name: Set up .env file
         working-directory: laravel
         run: cp .env.example .env
 
-      # Stap 5: Databaseconfiguratie bijwerken voor CI
+      # Step 5: Update database configuration for CI
       - name: Update database configuration
         working-directory: laravel
         run: |
@@ -62,12 +62,12 @@ jobs:
           sed -i 's/DB_USERNAME=root/DB_USERNAME=root/' .env
           sed -i 's/DB_PASSWORD=/DB_PASSWORD=rootpassword/' .env
 
-      # Stap 6: Applicatiesleutel genereren
+      # Step 6: Generate application key
       - name: Generate application key
         working-directory: laravel
         run: php artisan key:generate
 
-      # Stap 7: Wachten tot MySQL beschikbaar is
+      # Step 7: Wait for MySQL to be ready
       - name: Wait for MySQL to be ready
         run: |
           while ! mysqladmin --user=root --password=rootpassword --host=127.0.0.1 --port=3306 ping --silent; do
@@ -75,4 +75,49 @@ jobs:
             sleep 2
           done
 
-      # Stap 8
+      # Step 8: Run migrations
+      - name: Run migrations
+        working-directory: laravel
+        run: php artisan migrate --env=testing --force
+
+      # Step 9: Run Unit Tests and Generate Coverage Report (from Vendor)
+      - name: Run Unit Tests and Generate Coverage Report
+        working-directory: laravel
+        run: |
+          if [ -f ./vendor/bin/phpunit ]; then
+            ./vendor/bin/phpunit --configuration phpunit.xml --coverage-clover=coverage.xml
+          else
+            echo "PHPUnit not found in vendor, installing globally."
+            composer global require phpunit/phpunit:^9.0
+            ~/.composer/vendor/bin/phpunit --configuration phpunit.xml --coverage-clover=coverage.xml
+          fi
+
+      # Step 10: Verify Coverage Report Exists
+      - name: Verify Coverage Report Exists
+        working-directory: laravel
+        run: ls -la
+
+      # Step 11: Upload Coverage to Codecov
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          files: coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
+
+      # Step 12: Set up Java for SonarQube
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      # Step 13: Run SonarQube Analysis
+      - name: Run SonarQube Analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          sonar-scanner -Dsonar.projectKey=project-cin \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=http://localhost:9000 \
+                        -Dsonar.login=${{ secrets.SONAR_TOKEN }}
