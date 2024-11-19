@@ -7,7 +7,7 @@
         </x-slot>
 
         <div class="mb-4 text-sm text-gray-600">
-            {{ __('Dit is een veilige plek van de applicatie. Bevestig uw wachtwoord voor u verder gaat.') }}
+            {{ __('Dit is een veilige plek van de applicatiee. Bevestig uw wachtwoord voor u verder gaat.') }}
         </div>
 
         <!-- Validation Errors -->
