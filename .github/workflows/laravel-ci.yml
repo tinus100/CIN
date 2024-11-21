@@ -12,7 +12,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Gebruik nu een Linux runner die Docker en MySQL ondersteunt
+    runs-on: ubuntu-latest
 
     services:
       mysql:
@@ -29,29 +29,29 @@ jobs:
           --health-retries=3
 
     steps:
-      # Stap 1: Checkout de repository
+      # Step 1: Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Stap 2: Set up PHP
+      # Step 2: Set up PHP (PHP 8.2 gebruikt om compatibiliteit met symfony pakketten te garanderen)
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.1'  # Set de PHP versie die je nodig hebt
+          php-version: '8.2'  # Verhoog de PHP-versie naar 8.2
           extensions: mbstring, bcmath, gd, xml, pdo, tokenizer
-          coverage: xdebug  # Optioneel: als je een coverage rapport wilt
+          coverage: xdebug  # Optional: if you want coverage reports
 
-      # Stap 3: Install dependencies
+      # Step 3: Install dependencies
       - name: Install dependencies
         run: |
           composer install --prefer-dist --no-scripts --no-progress --no-interaction
 
-      # Stap 4: Set up de .env file
+      # Step 4: Set up the .env file
       - name: Set up .env file
         run: cp .env.example .env
 
-      # Stap 5: Update database configuratie voor CI
-      - name: Update database configuratie
+      # Step 5: Update database configuration for CI
+      - name: Update database configuration
         run: |
           sed -i 's/DB_CONNECTION=mysql/DB_CONNECTION=mysql/' .env
           sed -i 's/DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/' .env
@@ -60,11 +60,11 @@ jobs:
           sed -i 's/DB_USERNAME=root/DB_USERNAME=root/' .env
           sed -i 's/DB_PASSWORD=/DB_PASSWORD=rootpassword/' .env
 
-      # Stap 6: Generate application key
+      # Step 6: Generate application key
       - name: Generate application key
         run: php artisan key:generate
 
-      # Stap 7: Wacht tot MySQL beschikbaar is
+      # Step 7: Wait for MySQL service to be ready
       - name: Wait for MySQL to be ready
         run: |
           while ! mysqladmin --user=root --password=rootpassword --host=127.0.0.1 --port=3306 ping --silent; do
@@ -72,15 +72,27 @@ jobs:
             sleep 2
           done
 
-      # Stap 8: Run migrations
+      # Step 8: Run migrations
       - name: Run migrations
         run: php artisan migrate --env=testing
 
-      # Stap 9: Run tests
-      - name: Run tests
-        run: php artisan test
+      # Step 9: Run Unit Tests and Generate Coverage Report
+      - name: Run Unit Tests and Generate Coverage Report
+        run: php artisan test --coverage-clover=coverage.xml
 
-      # Stap 10: Run SonarQube Analysis
+      # Step 10: Verify Coverage Report Exists
+      - name: Verify Coverage Report Exists
+        run: ls -la
+
+      # Step 11: Upload Coverage to Codecov
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          files: coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
+
+      # Step 12: Run SonarQube Analysis
       - name: Run SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -89,11 +101,4 @@ jobs:
                         -Dsonar.sources=. \
                         -Dsonar.host.url=http://localhost:9000 \
                         -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-          
-      # Stap 11: Upload coverage naar Codecov
-      - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          files: coverage.xml
-          token: ${{ secrets.CODECOV_TOKEN }}
-          verbose: true
+
