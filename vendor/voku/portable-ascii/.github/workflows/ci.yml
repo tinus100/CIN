@@ -24,15 +24,18 @@ jobs:
             7.4,
             8.0,
             8.1,
+            8.2,
+            8.3,
+            8.4
         ]
         composer: [basic]
     timeout-minutes: 10
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@2.17.1
+        uses: shivammathur/setup-php@2.31.1
         with:
           php-version: ${{ matrix.php }}
           coverage: xdebug
@@ -44,7 +47,7 @@ jobs:
         run: echo "::set-output name=directory::$(composer config cache-dir)"
 
       - name: Cache composer dependencies
-        uses: actions/cache@v2.1.7
+        uses: actions/cache@v4.1.2
         with:
           path: ${{ steps.composer-cache.outputs.directory }}
           key: ${{ matrix.php }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -85,18 +88,13 @@ jobs:
           php-coveralls --coverage_clover=build/logs/clover.xml -v
 
       - name: Upload coverage results to Codecov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v5
         with:
           files: build/logs/clover.xml
 
-      - name: Upload coverage results to Scrutinizer
-        uses: sudo-bot/action-scrutinizer@latest
-        with:
-          cli-args: "--format=php-clover build/logs/clover.xml"
-
       - name: Archive logs artifacts
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: logs_composer-${{ matrix.composer }}_php-${{ matrix.php }}
           path: |
