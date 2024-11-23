@@ -16,64 +16,55 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: rootpassword
-          MYSQL_DATABASE: testing
+          MYSQL_ROOT_PASSWORD: root_password
+          MYSQL_DATABASE: laravel_test
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping --host=localhost --user=root --password=rootpassword"
+          --health-cmd="mysqladmin ping --host=127.0.0.1 --user=root --password=root_password"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
 
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Set up PHP (versie 8.2)
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'  # Hier de PHP versie opgehoogd naar 8.2
+          php-version: '8.2'
           extensions: mbstring, bcmath, gd, xml, pdo, tokenizer
-          coverage: xdebug  # Optioneel: als je coverage rapporten wilt
+          coverage: xdebug
 
-      # Step 3: Install dependencies
       - name: Install dependencies
         run: |
           composer install --prefer-dist --no-scripts --no-progress --no-interaction
 
-      # Step 4: Set up the .env file
-      - name: Set up .env file
-        run: cp .env.example .env
+      - name: Set up the .env file
+        run: cp .env.testing .env
 
-      # Step 5: Update database configuration for CI
-      - name: Update database configuration
-        run: |
-          sed -i 's/DB_CONNECTION=mysql/DB_CONNECTION=mysql/' .env
-          sed -i 's/DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/' .env
-          sed -i 's/DB_PORT=3306/DB_PORT=3306/' .env
-          sed -i 's/DB_DATABASE=laravel/DB_DATABASE=testing/' .env
-          sed -i 's/DB_USERNAME=root/DB_USERNAME=root/' .env
-          sed -i 's/DB_PASSWORD=/DB_PASSWORD=rootpassword/' .env
-
-      # Step 6: Generate application key
       - name: Generate application key
         run: php artisan key:generate
 
-      # Step 7: Wait for MySQL service to be ready
       - name: Wait for MySQL to be ready
         run: |
-          while ! mysqladmin --user=root --password=rootpassword --host=127.0.0.1 --port=3306 ping --silent; do
+          while ! mysqladmin --user=root --password=root_password --host=127.0.0.1 --port=3306 ping --silent; do
             echo "Waiting for MySQL to be ready..."
             sleep 2
           done
 
-      # Step 8: Run migrations (optioneel, alleen als je ze nodig hebt voor je tests)
       - name: Run migrations
-        run: php artisan migrate --env=testing
+        run: php artisan migrate --env=testing --force
 
-      # Step 9: Run tests
       - name: Run tests
-        run: php artisan test
+        run: php artisan test --env=testing
+
+      # Optional: Codecov Integration
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          files: coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
+
