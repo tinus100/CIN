@@ -31,28 +31,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up PHP
+      # Step 2: Set up PHP (versie 8.2)
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.1'
+          php-version: '8.2'  # Hier de PHP versie opgehoogd naar 8.2
           extensions: mbstring, bcmath, gd, xml, pdo, tokenizer
-          coverage: xdebug
+          coverage: xdebug  # Optioneel: als je coverage rapporten wilt
 
-      # Step 3: Clear Composer Cache
-      - name: Clear Composer Cache
-        run: composer clear-cache
-
-      # Step 4: Install dependencies
+      # Step 3: Install dependencies
       - name: Install dependencies
         run: |
           composer install --prefer-dist --no-scripts --no-progress --no-interaction
 
-      # Step 5: Set up the .env file
+      # Step 4: Set up the .env file
       - name: Set up .env file
         run: cp .env.example .env
 
-      # Step 6: Update database configuration for CI
+      # Step 5: Update database configuration for CI
       - name: Update database configuration
         run: |
           sed -i 's/DB_CONNECTION=mysql/DB_CONNECTION=mysql/' .env
@@ -62,11 +58,11 @@ jobs:
           sed -i 's/DB_USERNAME=root/DB_USERNAME=root/' .env
           sed -i 's/DB_PASSWORD=/DB_PASSWORD=rootpassword/' .env
 
-      # Step 7: Generate application key
+      # Step 6: Generate application key
       - name: Generate application key
         run: php artisan key:generate
 
-      # Step 8: Wait for MySQL service to be ready
+      # Step 7: Wait for MySQL service to be ready
       - name: Wait for MySQL to be ready
         run: |
           while ! mysqladmin --user=root --password=rootpassword --host=127.0.0.1 --port=3306 ping --silent; do
@@ -74,11 +70,10 @@ jobs:
             sleep 2
           done
 
-      # Step 9: Run migrations (optional, only if you need them for your tests)
+      # Step 8: Run migrations (optioneel, alleen als je ze nodig hebt voor je tests)
       - name: Run migrations
         run: php artisan migrate --env=testing
 
-      # Step 10: Run tests using phpunit from vendor (if installed by Composer)
+      # Step 9: Run tests
       - name: Run tests
-        run: ./vendor/bin/phpunit --configuration phpunit.xml
-
+        run: php artisan test
