@@ -38,6 +38,7 @@ jobs:
           coverage: xdebug
 
       - name: Install dependencies
+        working-directory: ./laravel
         run: |
           composer install --prefer-dist --no-scripts --no-progress --no-interaction
 
