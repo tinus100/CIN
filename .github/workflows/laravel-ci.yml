@@ -51,6 +51,7 @@ jobs:
 
       # Step 5: Update database configuration for CI
       - name: Update database configuration
+        working-directory: ./laravel
         run: |
           sed -i 's/DB_CONNECTION=mysql/DB_CONNECTION=mysql/' .env
           sed -i 's/DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/' .env
