@@ -41,8 +41,8 @@ jobs:
 
       # Step 3: Install dependencies
       - name: Install dependencies
-        run: |
-          composer install --prefer-dist --no-scripts --no-progress --no-interaction
+        working-directory: ./laravel
+        run: composer install --prefer-dist --no-scripts --no-progress --no-interaction
 
       # Step 4: Set up the .env file
       - name: Set up .env file
