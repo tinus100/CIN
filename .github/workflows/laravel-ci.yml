@@ -69,7 +69,7 @@ jobs:
       - name: Wait for MySQL to be ready
         working-directory: ./laravel
         run: |
-          while ! mysqladmin --user=root --password=rootpassword --host=127.0.0.1 --port=3306 ping --silent; do
+          while ! mysqladmin --user=root --password=root_password --host=127.0.0.1 --port=3306 ping --silent; do
             echo "Waiting for MySQL to be ready..."
             sleep 2
           done
