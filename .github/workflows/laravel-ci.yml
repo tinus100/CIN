@@ -46,6 +46,7 @@ jobs:
 
       # Step 4: Set up the .env file
       - name: Set up .env file
+        working-directory: ./laravel
         run: cp .env.example .env
 
       # Step 5: Update database configuration for CI
