@@ -62,10 +62,12 @@ jobs:
 
       # Step 6: Generate application key
       - name: Generate application key
+        working-directory: ./laravel
         run: php artisan key:generate
 
       # Step 7: Wait for MySQL service to be ready
       - name: Wait for MySQL to be ready
+        working-directory: ./laravel
         run: |
           while ! mysqladmin --user=root --password=rootpassword --host=127.0.0.1 --port=3306 ping --silent; do
             echo "Waiting for MySQL to be ready..."
@@ -74,8 +76,10 @@ jobs:
 
       # Step 8: Run migrations (optional, only if you need them for your tests)
       - name: Run migrations
+        working-directory: ./laravel
         run: php artisan migrate --env=testing
 
       # Step 9: Run tests
       - name: Run tests
+        working-directory: ./laravel
         run: php artisan test
