@@ -35,7 +35,7 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.1'  # Set the PHP version you want
+          php-version: '8.2'  # Set the PHP version you want
           extensions: mbstring, bcmath, gd, xml, pdo, tokenizer
           coverage: xdebug  # Optional: if you want coverage reports
 
