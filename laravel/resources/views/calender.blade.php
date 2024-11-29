@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Kledingbank Zeeland agenda!</title>
+    <title>Kledingbank Zeeland agendaa</title>
 
     <meta name="csrf-token" content="{{ csrf_token() }}" />
 
