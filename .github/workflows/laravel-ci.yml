@@ -1,4 +1,4 @@
-name: Laravel CI with Database Tests
+name: Laravel CI with Database Tests and SonarCloud
 
 on:
   push:
@@ -30,14 +30,16 @@ jobs:
       # Step 1: Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Required for SonarCloud analysis
 
       # Step 2: Set up PHP
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'  # Set the PHP version you want
+          php-version: '8.2'
           extensions: mbstring, bcmath, gd, xml, pdo, tokenizer
-          coverage: xdebug  # Optional: if you want coverage reports
+          coverage: xdebug  # Enable xdebug for test coverage
 
       # Step 3: Install dependencies
       - name: Install dependencies
@@ -56,7 +58,7 @@ jobs:
           sed -i 's/DB_CONNECTION=mysql/DB_CONNECTION=mysql/' .env
           sed -i 's/DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/' .env
           sed -i 's/DB_PORT=3306/DB_PORT=3306/' .env
-          sed -i 's/DB_DATABASE=laravel/DB_DATABASE=testing/' .env
+          sed -i 's/DB_DATABASE=laravel/DB_DATABASE=laravel_test/' .env
           sed -i 's/DB_USERNAME=root/DB_USERNAME=root/' .env
           sed -i 's/DB_PASSWORD=/DB_PASSWORD=root_password/' .env
 
@@ -74,19 +76,26 @@ jobs:
             sleep 2
           done
 
-      # Step 8: Run migrations (optional, only if you need them for your tests)
+      # Step 8: Run migrations
       - name: Run migrations
         working-directory: ./laravel
-        run: php artisan migrate --env=testing
+        run: php artisan migrate --env=testing --force
 
-      # Step 9: Run tests
-      - name: Run tests
+      # Step 9: Run tests and generate coverage report
+      - name: Run tests with coverage
         working-directory: ./laravel
-        run: php artisan test
+        run: vendor/bin/phpunit --coverage-clover=coverage.xml
 
+      # Step 10: Upload coverage to Codecov
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
           files: ./laravel/coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
-      
+
+      # Step 11: Run SonarCloud analysis
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # For pull request decorations
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # Your SonarCloud token
