@@ -38,28 +38,23 @@ jobs:
           coverage: xdebug
 
       - name: Install dependencies
-        working-directory: ./laravel
         run: |
           composer install --prefer-dist --no-scripts --no-progress --no-interaction
 
-      - name: Set up the .env file
-        run: cp .env
+      - name: Ensure .env exists
+        run: |
+          if [ ! -f .env ]; then
+            cp .env.example .env
+          fi
 
       - name: Generate application key
         run: php artisan key:generate
 
-      - name: Wait for MySQL to be ready
-        run: |
-          while ! mysqladmin --user=root --password=root_password --host=127.0.0.1 --port=3306 ping --silent; do
-            echo "Waiting for MySQL to be ready..."
-            sleep 2
-          done
-
       - name: Run migrations
-        run: php artisan migrate --env=testing --force
+        run: php artisan migrate --force
 
-      - name: Run tests
-        run: php artisan test --env=testing
+      - name: Run tests with coverage
+        run: vendor/bin/phpunit --coverage-clover=coverage.xml
 
       # Optional: Codecov Integration
       - name: Upload Coverage to Codecov
