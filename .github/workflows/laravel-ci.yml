@@ -43,7 +43,7 @@ jobs:
           composer install --prefer-dist --no-scripts --no-progress --no-interaction
 
       - name: Set up the .env file
-        run: cp .env.testing .env
+        run: cp .env
 
       - name: Generate application key
         run: php artisan key:generate
