@@ -1,4 +1,4 @@
-name: Laravel CI with Database Tests and SonarCloud
+name: Laravel CI with Database Tests and Coverage Reporting
 
 on:
   push:
@@ -67,7 +67,7 @@ jobs:
         working-directory: ./laravel
         run: php artisan key:generate
 
-      # Step 7: Wait for MySQL service to be ready
+      # Step 7: Wait for MySQL to be ready
       - name: Wait for MySQL to be ready
         working-directory: ./laravel
         run: |
@@ -81,21 +81,26 @@ jobs:
         working-directory: ./laravel
         run: php artisan migrate --env=testing --force
 
-      # Step 9: Run tests and generate coverage report
-      - name: Run tests with coverage
+      # Step 9: Run tests with coverage
+      - name: Run tests and generate coverage
         working-directory: ./laravel
         run: vendor/bin/phpunit --coverage-clover=coverage.xml
 
-      # Step 10: Upload coverage to Codecov
+      # Step 10: Debug coverage.xml
+      - name: Check if coverage.xml exists
+        working-directory: ./laravel
+        run: ls -al coverage.xml
+
+      # Step 11: Upload coverage to Codecov
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
           files: ./laravel/coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
 
-      # Step 11: Run SonarCloud analysis
+      # Step 12: Run SonarCloud analysis
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # For pull request decorations
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # Your SonarCloud token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
