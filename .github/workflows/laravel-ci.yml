@@ -3,44 +3,77 @@ name: Laravel CI with Database Tests
 on:
   push:
     branches:
-      - develop
+      - main
   pull_request:
     branches:
-      - develop
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: testing
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --host=localhost --user=root --password=rootpassword"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
     steps:
-      - name: Checkout repository
+      # Step 1: Checkout the repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: List root directory contents
-        run: ls -al
+      # Step 2: Set up PHP
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'  # Set the PHP version you want
+          extensions: mbstring, bcmath, gd, xml, pdo, tokenizer
+          coverage: xdebug  # Optional: if you want coverage reports
 
-      - name: Check Laravel directory contents
-        run: ls -al laravel
-
+      # Step 3: Install dependencies
       - name: Install dependencies
-        working-directory: ./laravel
-        run: composer install --prefer-dist --no-scripts --no-progress --no-interaction
-
-      - name: Ensure .env exists
-        working-directory: ./laravel
         run: |
-          if [ ! -f .env ]; then
-            cp .env.example .env
-          fi
+          composer install --prefer-dist --no-scripts --no-progress --no-interaction
 
+      # Step 4: Set up the .env file
+      - name: Set up .env file
+        run: cp .env.example .env
+
+      # Step 5: Update database configuration for CI
+      - name: Update database configuration
+        run: |
+          sed -i 's/DB_CONNECTION=mysql/DB_CONNECTION=mysql/' .env
+          sed -i 's/DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/' .env
+          sed -i 's/DB_PORT=3306/DB_PORT=3306/' .env
+          sed -i 's/DB_DATABASE=laravel/DB_DATABASE=testing/' .env
+          sed -i 's/DB_USERNAME=root/DB_USERNAME=root/' .env
+          sed -i 's/DB_PASSWORD=/DB_PASSWORD=rootpassword/' .env
+
+      # Step 6: Generate application key
       - name: Generate application key
-        working-directory: ./laravel
         run: php artisan key:generate
 
-      - name: Run migrations
-        working-directory: ./laravel
-        run: php artisan migrate --force
+      # Step 7: Wait for MySQL service to be ready
+      - name: Wait for MySQL to be ready
+        run: |
+          while ! mysqladmin --user=root --password=rootpassword --host=127.0.0.1 --port=3306 ping --silent; do
+            echo "Waiting for MySQL to be ready..."
+            sleep 2
+          done
 
+      # Step 8: Run migrations (optional, only if you need them for your tests)
+      - name: Run migrations
+        run: php artisan migrate --env=testing
+
+      # Step 9: Run tests
       - name: Run tests
-        working-directory: ./laravel
         run: php artisan test
