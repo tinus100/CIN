@@ -16,10 +16,10 @@
         <include>
             <directory suffix=".php">./app</directory>
         </include>
+        <report>
+            <clover outputFile="coverage.xml"/>
+        </report>
     </coverage>
-    <logging>
-        <log type="coverage-clover" target="coverage.xml"/>
-    </logging>
     <php>
         <server name="APP_ENV" value="testing"/>
         <server name="BCRYPT_ROUNDS" value="4"/>
