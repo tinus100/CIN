@@ -10,8 +10,6 @@ use Illuminate\Validation\ValidationException;
 
 class ConfirmablePasswordController extends Controller
 {
-
-
     /**
      * Show the confirm password view.
      *
@@ -20,7 +18,6 @@ class ConfirmablePasswordController extends Controller
     public function show()
     {
         return view('auth.confirm-password');
-
     }//end show()
 
 
@@ -32,12 +29,13 @@ class ConfirmablePasswordController extends Controller
      */
     public function store(Request $request)
     {
-        if (! Auth::guard('web')->validate(
-            [
+        if (
+            ! Auth::guard('web')->validate(
+                [
                 'email'    => $request->user()->email,
                 'password' => $request->password,
-            ]
-        )
+                ]
+            )
         ) {
             throw ValidationException::withMessages(
                 [
@@ -49,8 +47,5 @@ class ConfirmablePasswordController extends Controller
         $request->session()->put('auth.password_confirmed_at', time());
 
         return redirect()->intended(RouteServiceProvider::HOME);
-
     }//end store()
-
-
 }//end class

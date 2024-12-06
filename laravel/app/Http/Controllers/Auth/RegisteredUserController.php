@@ -12,8 +12,6 @@ use Illuminate\Support\Facades\Hash;
 
 class RegisteredUserController extends Controller
 {
-
-
     /**
      * Display the registration view.
      *
@@ -22,7 +20,6 @@ class RegisteredUserController extends Controller
     public function create()
     {
         return view('auth.register');
-
     }//end create()
 
 
@@ -56,11 +53,8 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-       Auth::login($user);
+        Auth::login($user);
 
         return redirect(RouteServiceProvider::HOME);
-
     }//end store()
-
-
 }//end class

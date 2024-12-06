@@ -10,8 +10,6 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthenticatedSessionController extends Controller
 {
-
-
     /**
      * Display the login view.
      *
@@ -20,7 +18,6 @@ class AuthenticatedSessionController extends Controller
     public function create()
     {
         return view('auth.login');
-
     }//end create()
 
 
@@ -37,7 +34,6 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         return redirect()->intended(RouteServiceProvider::HOME);
-
     }//end store()
 
 
@@ -56,8 +52,5 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/');
-
     }//end destroy()
-
-
 }//end class

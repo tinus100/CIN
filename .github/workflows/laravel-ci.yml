@@ -46,12 +46,17 @@ jobs:
         working-directory: ./laravel
         run: composer install --prefer-dist --no-scripts --no-progress --no-interaction
 
-      # Step 4: Set up the .env file
+      # Step 4: Run PHP_CodeSniffer
+      - name: Run PHP_CodeSniffer
+        working-directory: ./laravel
+        run: vendor/bin/phpcs --standard=PSR12 app
+
+      # Step 5: Set up the .env file
       - name: Set up .env file
         working-directory: ./laravel
         run: cp .env.example .env
 
-      # Step 5: Update database configuration for CI
+      # Step 6: Update database configuration for CI
       - name: Update database configuration
         working-directory: ./laravel
         run: |
@@ -62,12 +67,12 @@ jobs:
           sed -i 's/DB_USERNAME=root/DB_USERNAME=root/' .env
           sed -i 's/DB_PASSWORD=/DB_PASSWORD=root_password/' .env
 
-      # Step 6: Generate application key
+      # Step 7: Generate application key
       - name: Generate application key
         working-directory: ./laravel
         run: php artisan key:generate
 
-      # Step 7: Wait for MySQL to be ready
+      # Step 8: Wait for MySQL to be ready
       - name: Wait for MySQL to be ready
         working-directory: ./laravel
         run: |
@@ -76,35 +81,35 @@ jobs:
             sleep 2
           done
 
-      # Step 8: Run migrations
+      # Step 9: Run migrations
       - name: Run migrations
         working-directory: ./laravel
         run: php artisan migrate --env=testing --force
 
-      # Step 9: Run tests with coverage
+      # Step 10: Run tests with coverage
       - name: Run tests and generate coverage
         working-directory: ./laravel
         run: vendor/bin/phpunit --coverage-clover=coverage.xml
 
-      # Step 10: Debug coverage.xml
+      # Step 11: Debug coverage.xml
       - name: Check if coverage.xml exists
         working-directory: ./laravel
         run: ls -al coverage.xml
 
-      # Step 11: Upload coverage to Codecov
+      # Step 12: Upload coverage to Codecov
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
           files: ./laravel/coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
 
-      # Step 12: Run SonarCloud analysis
+      # Step 13: Run SonarCloud analysis
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
+      # Step 14: Check analyzed files
       - name: Check analyzed files
         run: cat sonar-project.properties
-        

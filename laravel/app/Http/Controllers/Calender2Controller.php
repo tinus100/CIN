@@ -10,8 +10,6 @@ use Illuminate\Support\Facades\DB;
 
 class Calender2Controller extends Controller
 {
-
-
     /**
      * Display the calender with all exising events. Code taken from fullcalendar source code.
      *
@@ -25,7 +23,6 @@ class Calender2Controller extends Controller
         }
 
         return view('calender');
-
     }//end index()
 
 
@@ -37,7 +34,6 @@ class Calender2Controller extends Controller
     public function create()
     {
         return view('calender.create');
-
     }//end create()
 
 
@@ -75,7 +71,6 @@ class Calender2Controller extends Controller
         } else {
             return redirect('/events/create');
         }//end if
-
     }//end store()
 
 
@@ -88,7 +83,6 @@ class Calender2Controller extends Controller
     public function show(Event $event)
     {
         return view('calender.show', ['event' => $event]);
-
     }//end show()
 
 
@@ -100,7 +94,6 @@ class Calender2Controller extends Controller
      */
     public function edit(Event $event)
     {
-
     }//end edit()
 
 
@@ -113,7 +106,6 @@ class Calender2Controller extends Controller
      */
     public function update(Request $request, Event $event)
     {
-
     }//end update()
 
 
@@ -127,7 +119,6 @@ class Calender2Controller extends Controller
     {
         $event->delete();
         return redirect('/calender');
-
     }//end destroy()
 
 
@@ -135,19 +126,15 @@ class Calender2Controller extends Controller
     public function checkForOverlap($value)
     {
         return Event::where('start', '<=', $value)->where('end', '>=', $value)->count() == 0;
-
     }//end checkForOverlap()
 
 
     // An hour is added to the start time for every person. New variable is returned.
     public function determineEndTime($ammount, $start)
     {
-        $hourString = 'PT'.$ammount.'H';
+        $hourString = 'PT' . $ammount . 'H';
         $date       = new DateTime($start);
         $date->add(new DateInterval($hourString));
         return $date;
-
     }//end determineEndTime()
-
-
 }//end class

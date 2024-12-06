@@ -7,22 +7,17 @@ use Illuminate\Support\Facades\Auth;
 
 class IndexController extends Controller
 {
-
-
     public function index()
     {
         switch (Auth::user()->function) {
             case 'admin':
-            return view('functions.admin.index');
+                return view('functions.admin.index');
 
                 break;
             case 'werknemer':
-            return view('functions.werknemer.index');
+                return view('functions.werknemer.index');
 
                 break;
         }
-
     }//end index()
-
-
 }//end class

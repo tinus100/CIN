@@ -13,8 +13,6 @@ use Illuminate\Support\Facades\Redirect;
 
 class AdminPageController extends Controller
 {
-
-
     /**
      * Display a listing of the resource.
      *
@@ -29,7 +27,6 @@ class AdminPageController extends Controller
         } else {
             return redirect('/');
         }
-
     }//end index()
 
 
@@ -41,7 +38,6 @@ class AdminPageController extends Controller
     public function create()
     {
         return view('auth.register');
-
     }//end create()
 
 
@@ -77,7 +73,6 @@ class AdminPageController extends Controller
 
 // Auth::login($user);
         return redirect('/admin');
-
     }//end store()
 
 
@@ -90,7 +85,6 @@ class AdminPageController extends Controller
     public function edit(User $user)
     {
         return view('functions.admin.admin-page.edit', compact('user'));
-
     }//end edit()
 
 
@@ -104,7 +98,6 @@ class AdminPageController extends Controller
     {
         $user->delete();
         return redirect('/admin');
-
     }//end destroy()
 
 
@@ -117,16 +110,13 @@ class AdminPageController extends Controller
         // }
         switch (Auth::user()->function) {
             case 'admin':
-            return true;
+                return true;
 
                 break;
 
             default:
-            return false;
+                return false;
                 break;
         }
-
     }//end validateFunction()
-
-
 }//end class

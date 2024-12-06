@@ -11,8 +11,6 @@ use Illuminate\Validation\ValidationException;
 
 class LoginRequest extends FormRequest
 {
-
-
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -21,7 +19,6 @@ class LoginRequest extends FormRequest
     public function authorize()
     {
         return true;
-
     }//end authorize()
 
 
@@ -36,7 +33,6 @@ class LoginRequest extends FormRequest
             'email'    => 'required|string|email',
             'password' => 'required|string',
         ];
-
     }//end rules()
 
 
@@ -62,7 +58,6 @@ class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
-
     }//end authenticate()
 
 
@@ -94,7 +89,6 @@ class LoginRequest extends FormRequest
                 ),
             ]
         );
-
     }//end ensureIsNotRateLimited()
 
 
@@ -105,9 +99,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey()
     {
-        return Str::lower($this->input('email')).'|'.$this->ip();
-
+        return Str::lower($this->input('email')) . '|' . $this->ip();
     }//end throttleKey()
-
-
 }//end class
