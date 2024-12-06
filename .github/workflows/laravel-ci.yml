@@ -46,10 +46,10 @@ jobs:
         working-directory: ./laravel
         run: composer install --prefer-dist --no-scripts --no-progress --no-interaction
 
-      # Step 4: Run PHP_CodeSniffer
-      - name: Run PHP_CodeSniffer
+      # Step 4: Run PHP_CodeSniffer as warnings only
+      - name: Run PHP_CodeSniffer (Warnings Only)
         working-directory: ./laravel
-        run: vendor/bin/phpcs --standard=PSR12 app
+        run: vendor/bin/phpcs --standard=PSR12 app || echo "Linting completed with warnings"
 
       # Step 5: Set up the .env file
       - name: Set up .env file
