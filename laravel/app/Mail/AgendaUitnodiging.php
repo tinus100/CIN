@@ -9,7 +9,8 @@ use Illuminate\Queue\SerializesModels;
 
 class AgendaUitnodiging extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
 
     /**
@@ -19,7 +20,6 @@ class AgendaUitnodiging extends Mailable
      */
     public function __construct()
     {
-
     }//end __construct()
 
 
@@ -31,8 +31,5 @@ class AgendaUitnodiging extends Mailable
     public function build()
     {
         return $this->markdown('mails.uitnodiging');
-
     }//end build()
-
-
 }//end class

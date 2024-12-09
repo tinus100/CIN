@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
-
     /**
      * The policy mappings for the application.
      *
@@ -26,8 +25,5 @@ class AuthServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->registerPolicies();
-
     }//end boot()
-
-
 }//end class

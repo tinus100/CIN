@@ -5,11 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Registration;
 use Illuminate\Http\Request;
 
-
 class RegistrationController extends Controller
 {
-
-
     /**
      * Display a listing of the resource.
      *
@@ -18,7 +15,6 @@ class RegistrationController extends Controller
     public function index()
     {
         return view('registrations.index', ['registrations' => Registration::all()]);
-
     }//end index()
 
 
@@ -30,7 +26,6 @@ class RegistrationController extends Controller
     public function create()
     {
         return view('registrations.create');
-
     }//end create()
 
 
@@ -58,7 +53,6 @@ class RegistrationController extends Controller
             )
         );
         return redirect('/registration');
-
     }//end store()
 
 
@@ -71,7 +65,6 @@ class RegistrationController extends Controller
     public function show(Registration $registration)
     {
         return view('registrations.show', ['registration' => $registration]);
-
     }//end show()
 
 
@@ -84,7 +77,6 @@ class RegistrationController extends Controller
     public function edit(Registration $registration)
     {
         return view('registrations.edit', compact('registration'));
-
     }//end edit()
 
 
@@ -111,8 +103,7 @@ class RegistrationController extends Controller
                 ]
             )
         );
-        return redirect('/registration/'.$registration->id);
-
+        return redirect('/registration/' . $registration->id);
     }//end update()
 
 
@@ -126,8 +117,5 @@ class RegistrationController extends Controller
     {
         $registration->delete();
         return redirect('/registration');
-
     }//end destroy()
-
-
 }//end class

@@ -3,13 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
 use App\Models\Event;
 
 class CalenderController extends Controller
 {
-
-
     public function index(Request $request)
     {
         if ($request->ajax()) {
@@ -18,45 +15,41 @@ class CalenderController extends Controller
         }
 
         return view('calender');
-
     }//end index()
 
 
-     public function action(Request $request)
-     {
-         if ($request->ajax()) {
-             if ($request->type == 'add') {
+    public function action(Request $request)
+    {
+        if ($request->ajax()) {
+            if ($request->type == 'add') {
                 $event = Event::create(
                     [
-                        'title' => $request->title,
-                        'start' => $request->start,
-                        'end'   => $request->end,
+                       'title' => $request->title,
+                       'start' => $request->start,
+                       'end'   => $request->end,
                     ]
                 );
 
-                 return response()->json($event);
-             }
+                return response()->json($event);
+            }
 
-             if ($request->type == 'update') {
+            if ($request->type == 'update') {
                 $event = Event::find($request->id)->update(
                     [
-                        'title' => $request->title,
-                        'start' => $request->start,
-                        'end'   => $request->end,
+                       'title' => $request->title,
+                       'start' => $request->start,
+                       'end'   => $request->end,
                     ]
                 );
 
-                 return response()->json($event);
-             }
+                return response()->json($event);
+            }
 
-             if ($request->type == 'delete') {
-                 $event = Event::find($request->id)->delete();
+            if ($request->type == 'delete') {
+                $event = Event::find($request->id)->delete();
 
-                 return response()->json($event);
-             }
-         }//end if
-
-     }//end action()
-
-
+                return response()->json($event);
+            }
+        }//end if
+    }//end action()
 }//end class

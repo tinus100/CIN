@@ -24,8 +24,5 @@ class Registration extends Model
     public function path()
     {
         return route('registration.show', $this);
-
     }//end path()
-
-
 }//end class
